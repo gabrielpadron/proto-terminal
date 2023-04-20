@@ -87,6 +87,7 @@ int main() {
   char command[MAX_COMMAND_LENGTH];
 
   while (1) {
+    execute_pwd();
     printf("$ ");
     fgets(command, MAX_COMMAND_LENGTH, stdin);
 
