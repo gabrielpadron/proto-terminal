@@ -7,16 +7,41 @@
 
 #define MAX_LENGTH 1024 // tamanho máximo do comando
 
+void bubble_sort(char *arr[], int n) {
+  char *temp;
+
+  for (int i = 0; i < n - 1; i++) {
+    for (int j = 0; j < n - i - 1; j++) {
+      if (strcmp(arr[j], arr[j + 1]) > 0) {
+        temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+      }
+    }
+  }
+}
+
 void execute_ls() {
   DIR *dir;
   struct dirent *ent;
+  char *files[1000];
+  int count = 0;
 
   if ((dir = opendir(".")) != NULL) {
-    // imprime o nome de todos os arquivos e diretorios do diretorio atual
     while ((ent = readdir(dir)) != NULL) {
-      printf("%s\n", ent->d_name);
+      files[count] = strdup(ent->d_name);
+      count++;
     }
     closedir(dir);
+
+    // ordena o vetor que contem o nome dos arquivos e diretorios
+    bubble_sort(files, count);
+
+    // imprime o nome de todos os arquivos e diretórios ordenados
+    for (int i = 0; i < count; i++) {
+      printf("%s\n", files[i]);
+      free(files[i]);
+    }
   } else {
     perror("Não foi possível abrir o diretório");
   }
