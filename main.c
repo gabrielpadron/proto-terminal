@@ -2,10 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <sys/stat.h> // S_ISDIR()
 #include <sys/wait.h> // define wait
 #include <unistd.h>   // fork()
 
-#define MAX_LENGTH 1024 // tamanho máximo do comando
+#define MAX_COMMAND_LENGTH 1024 // tamanho máximo do comando
+#define MAX_FILES 1000
+
 
 void execute_cd(char *path) {
   if (chdir(path) != 0) {
@@ -39,7 +42,7 @@ void bubble_sort(char *arr[], int n) {
 void execute_ls() {
   DIR *dir;
   struct dirent *ent;
-  char *files[1000];
+  char *files[MAX_FILES];
   int count = 0;
 
   if ((dir = opendir(".")) != NULL) {
@@ -54,7 +57,13 @@ void execute_ls() {
 
     // imprime o nome de todos os arquivos e diretórios ordenados
     for (int i = 0; i < count; i++) {
-      printf("%s\n", files[i]);
+      struct stat file_stat;
+      if (stat(files[i], &file_stat) == 0) {
+        if (S_ISDIR(file_stat.st_mode)) // verifica se é um diretório
+          printf("%s/\n", files[i]);
+        else
+          printf("%s\n", files[i]);
+      }
       free(files[i]);
     }
   } else {
@@ -75,17 +84,17 @@ void execute_cmd(char **cmd_args) {
 }
 
 int main() {
-  char command[MAX_LENGTH];
+  char command[MAX_COMMAND_LENGTH];
 
   while (1) {
     printf("$ ");
-    fgets(command, MAX_LENGTH, stdin);
+    fgets(command, MAX_COMMAND_LENGTH, stdin);
 
     // remove a quebra de linha no final do comando
     command[strcspn(command, "\n")] = 0;
 
     // verifica se há modificadores
-    char *args[MAX_LENGTH];
+    char *args[MAX_COMMAND_LENGTH];
     int arg_count = 0;
     char *token = strtok(command, " ");
     char *input_file = NULL;
