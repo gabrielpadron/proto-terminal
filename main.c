@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-#include <sys/stat.h> // S_ISDIR()
-#include <sys/wait.h> // define wait
-#include <unistd.h>   // fork()
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-#define MAX_COMMAND_LENGTH 1024 // tamanho máximo do comando
+#define MAX_COMMAND_LENGTH 1024
 #define MAX_FILES 1000
 
 
 void execute_cd(char *path) {
   if (chdir(path) != 0) {
-    perror("Não foi possível mudar para o diretório especificado");
+    perror("");
   }
 }
 
@@ -21,7 +21,7 @@ void execute_pwd() {
   if (getcwd(cwd, sizeof(cwd)) != NULL) {
     printf("%s\n", cwd);
   } else {
-    perror("Não foi possível obter o diretório atual");
+    perror("");
   }
 }
 
@@ -52,14 +52,12 @@ void execute_ls() {
     }
     closedir(dir);
 
-    // ordena o vetor que contem o nome dos arquivos e diretorios
     sort(files, count);
 
-    // imprime o nome de todos os arquivos e diretórios ordenados
     for (int i = 0; i < count; i++) {
       struct stat file_stat;
       if (stat(files[i], &file_stat) == 0) {
-        if (S_ISDIR(file_stat.st_mode)) // verifica se é um diretório
+        if (S_ISDIR(file_stat.st_mode))
           printf("%s/\n", files[i]);
         else
           printf("%s\n", files[i]);
@@ -67,7 +65,7 @@ void execute_ls() {
       free(files[i]);
     }
   } else {
-    perror("Não foi possível abrir o diretório");
+    perror("");
   }
 }
 
@@ -91,10 +89,9 @@ int main() {
     printf("$ ");
     fgets(command, MAX_COMMAND_LENGTH, stdin);
 
-    // remove a quebra de linha no final do comando
     command[strcspn(command, "\n")] = 0;
+    if (strcmp(command, "exit") == 0) exit(0);
 
-    // verifica se há modificadores
     char *args[MAX_COMMAND_LENGTH];
     int arg_count = 0;
     char *token = strtok(command, " ");
@@ -105,19 +102,15 @@ int main() {
 
     while (token != NULL) {
       if (strcmp(token, "<") == 0) {
-        // modificador de ENTRADA de arquivo
         token = strtok(NULL, " ");
         input_file = token;
       } else if (strcmp(token, ">") == 0) {
-        // modificador de SAIDA de arquivo
         token = strtok(NULL, " ");
         output_file = token;
       } else if (strcmp(token, "|") == 0) {
-        // modificador pipe
         token = strtok(NULL, " ");
         pipe_command = token;
       } else if (strcmp(token, "&") == 0) {
-        // execução em segundo plano
         background = 1;
         break;
       } else {
@@ -131,11 +124,9 @@ int main() {
     if (arg_count > 0) {
       args[arg_count] = NULL;
 
-      // cria um novo processo filho para executar o comando
       pid_t pid = fork();
 
       if (pid == 0) {
-        // processo filho - executa o comando com modificadores, se houver
         if (input_file != NULL)
           freopen(input_file, "r", stdin);
         if (output_file != NULL)
@@ -146,22 +137,18 @@ int main() {
 
           pid_t pipe_pid = fork();
           if (pipe_pid == 0) {
-            // processo filho - executa o comando do lado direito do modificador
             close(pipefd[1]);
             dup2(pipefd[0], STDIN_FILENO);
             execlp(pipe_command, pipe_command, NULL);
           } else {
-            // processo pai - executa o comando do lado esquerdo do modificador
             close(pipefd[0]);
             dup2(pipefd[1], STDIN_FILENO);
             execlp(args[0], args[0], NULL);
           }
         } else {
-          // executa o comando normalmente
           execute_cmd(args);
         }
       } else {
-        // processo pai - espera pelo filho terminar
         if (background == 0) wait(NULL);
       }
     }
