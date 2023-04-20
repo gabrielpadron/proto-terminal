@@ -25,7 +25,7 @@ void execute_pwd() {
   }
 }
 
-void bubble_sort(char *arr[], int n) {
+void sort(char *arr[], int n) {
   char *temp;
 
   for (int i = 0; i < n - 1; i++) {
@@ -53,7 +53,7 @@ void execute_ls() {
     closedir(dir);
 
     // ordena o vetor que contem o nome dos arquivos e diretorios
-    bubble_sort(files, count);
+    sort(files, count);
 
     // imprime o nome de todos os arquivos e diretórios ordenados
     for (int i = 0; i < count; i++) {
