@@ -7,6 +7,21 @@
 
 #define MAX_LENGTH 1024 // tamanho máximo do comando
 
+void execute_cd(char *path) {
+  if (chdir(path) != 0) {
+    perror("Não foi possível mudar para o diretório especificado");
+  }
+}
+
+void execute_pwd() {
+  char cwd[1024];
+  if (getcwd(cwd, sizeof(cwd)) != NULL) {
+    printf("%s\n", cwd);
+  } else {
+    perror("Não foi possível obter o diretório atual");
+  }
+}
+
 void bubble_sort(char *arr[], int n) {
   char *temp;
 
@@ -44,21 +59,6 @@ void execute_ls() {
     }
   } else {
     perror("Não foi possível abrir o diretório");
-  }
-}
-
-void execute_cd(char *path) {
-  if (chdir(path) != 0) {
-    perror("Não foi possível mudar para o diretório especificado");
-  }
-}
-
-void execute_pwd() {
-  char cwd[1024];
-  if (getcwd(cwd, sizeof(cwd)) != NULL) {
-    printf("%s\n", cwd);
-  } else {
-    perror("Não foi possível obter o diretório atual");
   }
 }
 
