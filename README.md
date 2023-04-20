@@ -1,6 +1,6 @@
 # Proto-terminal
 
-This is a terminal prototype implemented in C as a homework assignment for the Operating Systems course. The program provides a command-line interface where users can enter commands to interact with the operating system.
+This is a terminal prototype implemented in C as a project for the Operating Systems course. The program provides a command-line interface where users can enter commands to interact with the operating system.
 
 ## Features
 The shell program supports the following features:
