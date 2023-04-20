@@ -7,6 +7,48 @@
 
 #define MAX_LENGTH 1024 // tamanho máximo do comando
 
+void execute_ls() {
+  DIR *dir;
+  struct dirent *ent;
+
+  if ((dir = opendir(".")) != NULL) {
+    // imprime o nome de todos os arquivos e diretorios do diretorio atual
+    while ((ent = readdir(dir)) != NULL) {
+      printf("%s\n", ent->d_name);
+    }
+    closedir(dir);
+  } else {
+    perror("Não foi possível abrir o diretório");
+  }
+}
+
+void execute_cd(char *path) {
+  if (chdir(path) != 0) {
+    perror("Não foi possível mudar para o diretório especificado");
+  }
+}
+
+void execute_pwd() {
+  char cwd[1024];
+  if (getcwd(cwd, sizeof(cwd)) != NULL) {
+    printf("%s\n", cwd);
+  } else {
+    perror("Não foi possível obter o diretório atual");
+  }
+}
+
+void execute_cmd(char **cmd_args) {
+  if (strcmp(cmd_args[0], "cd") == 0) {
+    execute_cd(cmd_args[1]);
+  } else if (strcmp(cmd_args[0], "pwd") == 0) {
+    execute_pwd();
+  } else if (strcmp(cmd_args[0], "ls") == 0) {
+    execute_ls();
+  } else {
+    execvp(cmd_args[0], cmd_args);
+  }
+}
+
 int main() {
   char command[MAX_LENGTH];
 
@@ -81,7 +123,7 @@ int main() {
           }
         } else {
           // executa o comando normalmente
-          execvp(args[0], args);
+          execute_cmd(args);
         }
       } else {
         // processo pai - espera pelo filho terminar
